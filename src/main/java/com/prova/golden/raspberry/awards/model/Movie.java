@@ -15,17 +15,17 @@ public class Movie {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "release_year", nullable = false) // Renomeando a coluna e definindo como não nula
+    @Column(name = "release_year", nullable = false)
     private Integer year;
 
-    @Column(nullable = false) // Definindo título como não nulo
+    @Column(nullable = false)
     private String title;
 
     private String studios;
 
     private boolean winner;
 
-    @ManyToOne // Indica que muitos filmes podem ter um único produtor
-    @JoinColumn(name = "producer_id") // Nome da coluna na tabela movies
+    @ManyToOne
+    @JoinColumn(name = "producer_id")
     private Producer producer;
 }

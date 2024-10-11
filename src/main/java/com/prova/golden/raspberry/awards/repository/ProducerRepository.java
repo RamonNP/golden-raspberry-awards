@@ -9,6 +9,5 @@ import java.util.Optional;
 @Repository
 public interface ProducerRepository extends JpaRepository<Producer, Long> {
 
-    // Busca um produtor pelo nome
     Optional<Producer> findByName(String name);
 }

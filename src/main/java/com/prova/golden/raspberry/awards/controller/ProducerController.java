@@ -1,7 +1,7 @@
 package com.prova.golden.raspberry.awards.controller;
 
 import com.prova.golden.raspberry.awards.dto.ProducerStatsDTO;
-import com.prova.golden.raspberry.awards.exception.ProducerNotFoundException; // Importando a exceção personalizada
+import com.prova.golden.raspberry.awards.exception.ProducerNotFoundException;
 import com.prova.golden.raspberry.awards.service.ProducerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

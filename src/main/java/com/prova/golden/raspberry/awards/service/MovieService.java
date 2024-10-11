@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -26,60 +27,56 @@ public class MovieService {
     private final MovieRepository movieRepository;
     private final ProducerRepository producerRepository;
 
+    @Value("${csv.file.path}")
+    private String csvFilePath;
+
     @EventListener(ContextRefreshedEvent.class)
     public void loadMoviesFromCSV() {
-        try (InputStream inputStream = getClass().getResourceAsStream("/static/movielist.csv")) {
+        try (InputStream inputStream = getClass().getResourceAsStream(csvFilePath)) {
             if (inputStream == null) {
-                throw new IllegalArgumentException("Arquivo não encontrado: classpath:static/movielist.csv");
+                throw new IllegalArgumentException("Arquivo não encontrado: classpath:" + csvFilePath);
             }
 
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
                 CSVParser csvParser = CSVFormat.DEFAULT
-                        .withDelimiter(';') // Defina o delimitador usado no CSV (por exemplo, ';')
-                        .withFirstRecordAsHeader() // Ignora a primeira linha, considerando-a como cabeçalho
+                        .withDelimiter(';')
+                        .withFirstRecordAsHeader()
                         .parse(reader);
 
-                List<Movie> movies = new ArrayList<>();
                 for (CSVRecord record : csvParser) {
                     saveMovie(record);
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace(); // Aqui você pode usar um logger para logar a exceção
+            e.printStackTrace();
         }
     }
 
     private void saveMovie(CSVRecord record) {
-
-        // Criar e associar produtores ao Movie
         List<Producer> producers = findOrCreateProducers(record.get("producers"));
         for (Producer producer : producers) {
-            // Criar o Movie
             Movie movie = new Movie(
-                    null, // ID será gerado automaticamente (assumindo que seja auto incrementado)
+                    null,
                     Integer.parseInt(record.get("year")),
                     record.get("title"),
                     record.get("studios"),
                     "yes".equalsIgnoreCase(record.get("winner")),
                     producer
-
             );
-            Movie savedMovie = movieRepository.save(movie);
+            movieRepository.save(movie);
         }
-
     }
 
     private List<Producer> findOrCreateProducers(String producersString) {
         if (producersString == null || producersString.isEmpty()) {
-            return new ArrayList<>(); // Retorna uma lista vazia se não houver produtores
+            return new ArrayList<>();
         }
 
-        // Divide a string por vírgulas e pela palavra "and"
         String[] producerNames = producersString.split(",|\\band\\b");
 
         List<Producer> producers = new ArrayList<>();
         for (String name : producerNames) {
-            String trimmedName = name.trim(); // Remove espaços em branco
+            String trimmedName = name.trim();
             if (!trimmedName.isEmpty()) {
                 Producer producer = producerRepository.findByName(trimmedName)
                         .orElseGet(() -> {

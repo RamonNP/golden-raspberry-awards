@@ -138,7 +138,7 @@ Verifique os resultados dos testes no console. Eles devem validar que os dados r
 
 Considerações Finais
 O banco de dados utilizado é o H2, que roda em memória e não requer instalação ou configuração adicional.
-Para qualquer dúvida ou problema, entre em contato pelo e-mail seu-email@exemplo.com.
+Para qualquer dúvida ou problema, entre em contato pelo e-mail ramon.pereira3156@gmail.com.
 Autor
 Ramon do Nascimento Pereira
 LinkedIn

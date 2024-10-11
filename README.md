@@ -49,14 +49,12 @@ year;title;studios;producers;winner
 
 Compile e construa o projeto usando Maven:
 
-bash
-
 mvn clean install
+
 Execute a aplicação:
 
-bash
-
 mvn spring-boot:run
+
 A aplicação estará disponível em: http://localhost:8080/producers/intervals
 
 Endpoints
@@ -133,6 +131,7 @@ Execute os testes usando Maven:
 bash
 
 mvn test
+
 Isso executará todos os testes, incluindo os testes de integração localizados na classe ProducerControllerIntegrationTest.
 
 Verifique os resultados dos testes no console. Eles devem validar que os dados retornados pelo endpoint /producers/intervals estão de acordo com os dados de entrada.

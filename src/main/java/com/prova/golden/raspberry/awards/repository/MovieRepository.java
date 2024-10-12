@@ -28,7 +28,8 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
         JOIN producer p ON award_intervals.producer_id = p.id
         GROUP BY previous_year, release_year, p.name
         HAVING MAX(year_diff) IS NOT NULL
-        ORDER BY max_interval DESC, previous_year ASC;
+        ORDER BY max_interval DESC, previous_year ASC
+        LIMIT 1
     """, nativeQuery = true)
     List<Object[]> findMoviesWithMaxInterval();
 
@@ -50,7 +51,10 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
         JOIN producer p ON award_intervals.producer_id = p.id
         GROUP BY previous_year, release_year, p.name
         HAVING MAX(year_diff) IS NOT NULL
-        ORDER BY max_interval ASC, previous_year ASC;
+        ORDER BY max_interval ASC, previous_year ASC
+        LIMIT 1
     """, nativeQuery = true)
     List<Object[]> findMoviesWithMinInterval();
+    boolean existsByYearAndTitle(int year, String title);
+
 }

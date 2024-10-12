@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -24,6 +26,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MovieService {
 
+    private static final Logger logger = LoggerFactory.getLogger(MovieService.class);
+
     private final MovieRepository movieRepository;
     private final ProducerRepository producerRepository;
 
@@ -32,6 +36,14 @@ public class MovieService {
 
     @EventListener(ContextRefreshedEvent.class)
     public void loadMoviesFromCSV() {
+        List<Movie> movies = getMovies();
+        for (Movie movie : movies) {
+            movieRepository.save(movie);
+        }
+    }
+
+    public List<Movie> getMovies() {
+        List<Movie> movies = new ArrayList<>();
         try (InputStream inputStream = getClass().getResourceAsStream(csvFilePath)) {
             if (inputStream == null) {
                 throw new IllegalArgumentException("Arquivo não encontrado: classpath:" + csvFilePath);
@@ -44,27 +56,40 @@ public class MovieService {
                         .parse(reader);
 
                 for (CSVRecord record : csvParser) {
-                    saveMovie(record);
+                    movies.addAll(getMovieSplitByProducers(record));
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Erro ao ler o arquivo CSV: {}", e.getMessage(), e);
         }
+        return movies;
     }
 
-    private void saveMovie(CSVRecord record) {
+    private List<Movie> getMovieSplitByProducers(CSVRecord record) {
         List<Producer> producers = findOrCreateProducers(record.get("producers"));
+        List<Movie> movies = new ArrayList<>();
         for (Producer producer : producers) {
-            Movie movie = new Movie(
-                    null,
-                    Integer.parseInt(record.get("year")),
-                    record.get("title"),
-                    record.get("studios"),
-                    "yes".equalsIgnoreCase(record.get("winner")),
-                    producer
-            );
-            movieRepository.save(movie);
+            boolean isWinner = "yes".equalsIgnoreCase(record.get("winner"));
+            try {
+                int year = Integer.parseInt(record.get("year"));
+                String title = record.get("title");
+                String studios = record.get("studios");
+
+                Movie movie = new Movie(
+                        null,
+                        year,
+                        title,
+                        studios,
+                        isWinner,
+                        producer
+                );
+                movies.add(movie);
+            } catch (NumberFormatException e) {
+                logger.warn("Formato de ano inválido para o registro: {} - ignorando filme", record);
+            }
         }
+
+        return movies;
     }
 
     private List<Producer> findOrCreateProducers(String producersString) {
